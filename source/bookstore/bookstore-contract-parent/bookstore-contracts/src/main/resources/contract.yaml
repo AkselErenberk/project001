@@ -1,0 +1,299 @@
+openapi: 3.0.3
+info:
+  title: Bookstore API
+  description: REST API for managing books, carts, and user authentication.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/
+paths:
+  /api/hello-world:
+    get:
+      summary: Hello world
+      operationId: helloWorld
+      tags:
+        - auth
+      responses:
+        200:
+          description: hello world
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelloWorld"
+
+  /api/auth/register:
+    post:
+      summary: Registering the user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      tags:
+        - auth
+      responses:
+        201:
+          description: User registered
+
+  /api/auth/login:
+    post:
+      summary: Authenticating the current user
+      operationId: authenticateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      tags:
+        - auth
+      responses:
+        200:
+          description: User Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+
+  /api/books/:
+    get:
+      summary: Retrieve all the books
+      operationId: retrieveAllBooks
+      tags:
+        - books
+      responses:
+        200:
+          description: List of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+    post:
+      summary: Add new book
+      operationId: addBook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookRequest"
+      tags:
+        - books
+      responses:
+        201:
+          description: Created
+
+
+  /api/books/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Retrieve a book details by its id
+      operationId: retrieveBook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Book"
+      tags:
+        - books
+      responses:
+        200:
+          description: Book details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+
+        404:
+          description: Book not found
+
+    delete:
+      summary: Deleting a book by its id
+      operationId: deleteBook
+      tags:
+        - books
+      responses:
+        204:
+          description: Book deleted
+    put:
+      summary: Update a book by its id
+      operationId: updateBook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookRequest"
+      tags:
+        - books
+      responses:
+        200:
+          description: Book updated
+
+  /api/cart/:
+    get:
+      summary: View cart of logged-in user
+      operationId: retrieveCart
+      tags:
+        - cart
+      responses:
+        200:
+          description: Cart details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    post:
+      summary: Add new book
+      operationId: addBookQuantity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToCartRequest"
+      tags:
+        - cart
+      responses:
+        201:
+          description: Book added to cart
+
+
+  /api/cart/{bookId}:
+    parameters:
+      - in: path
+        name: bookId
+        required: true
+        schema:
+          type: string
+    delete:
+      summary: Removing a book from the cart
+      operationId: removeBook
+      tags:
+        - cart
+      responses:
+        204:
+          description: Book removed
+    put:
+      summary: Update quantity of a book
+      operationId: updateBookQuantity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateQuantityRequest"
+      tags:
+        - cart
+      responses:
+        201:
+          description: Created
+
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        price:
+          type: number
+
+    BookRequest:
+      type: object
+      required:
+        - title
+        - author
+        - price
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        price:
+          type: number
+
+    Cart:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        totalPrice:
+          type: number
+
+    CartItem:
+      type: object
+      properties:
+        bookId:
+          type: string
+        title:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: integer
+        subtotal:
+          type: number
+
+    AddToCartRequest:
+      type: object
+      required:
+        - bookId
+        - quantity
+      properties:
+        bookId:
+          type: string
+        quantity:
+          type: integer
+
+    UpdateQuantityRequest:
+      type: object
+      required:
+        - quantity
+      properties:
+        quantity:
+          type: integer
+
+
+    Credentials:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+
+    Token:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+
+    HelloWorld:
+      type: object
+      required:
+        - helloWorld
+      properties:
+        helloWorld:
+          type: string
+          enum:
+            - HELLO_WORLD

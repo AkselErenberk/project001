@@ -1,0 +1,57 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+component "External Service" {
+
+}
+
+database "Some Database" {
+      folder "Some Role" {
+        [DATABASE TABLE]
+      }
+}
+
+package "Core" {
+    [Services] --> [Model]
+    [Services] --> [Some Port]
+    portout " "
+    [Some Port] <-- " "
+}
+
+package "Service" {
+    [Spring Boot Configuration]
+}
+
+package "Endpoints" {
+    [API] --> [Endpoint]
+    [Endpoint] --> [Services]
+    [DTO Mappers] --> [DTO]
+    [Endpoint] --> [DTO Mappers]
+}
+
+package "Database" {
+    [Repositories] --> [Entities]
+    [Repositories] --> [Entity Mappers]
+    [Entity Mappers] --> [Entities]
+    [Repositories] --> "DATABASE TABLE"
+}
+
+package "Adapters" {
+    " " <-- [Some Adapter] : implements
+    [Some Adapter] --> [Client]
+    [Some Adapter] --> [Object Mappers]
+    [Some Adapter] ---> [Repositories]
+    [Client] --> "External Service"
+}
+
+package "Contract" {
+    [API contract] --> [DTO] : generates
+    [API contract] --> [API] : generates
+}
+
+component "Frontend" {
+    [Admin-UI] -> [Endpoint]
+    [User-UI] -> [Endpoint]
+}
+
+@enduml
