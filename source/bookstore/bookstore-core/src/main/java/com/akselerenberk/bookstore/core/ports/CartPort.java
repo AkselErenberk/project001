@@ -8,9 +8,9 @@ public interface CartPort {
 
     Cart retrieveCart();
 
-    void addItem(String bookId, Integer quantity);
+    Cart addItem(String bookId, Integer quantity);
 
-    void updateItem(String bookId, Integer quantity);
+    Cart updateItem(String bookId, Integer quantity);
 
-    void deleteItem(String bookId);
+    Cart deleteItem(String bookId);
 }

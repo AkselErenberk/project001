@@ -5,6 +5,7 @@ import com.akselerenberk.bookstore.adapters.services.AccountService;
 import com.akselerenberk.bookstore.common.exception.BadRequestException;
 import com.akselerenberk.bookstore.core.models.Cart;
 import com.akselerenberk.bookstore.core.ports.CartPort;
+import com.akselerenberk.bookstore.database.entities.CartEntity;
 import com.akselerenberk.bookstore.database.entities.CartItemEntity;
 import com.akselerenberk.bookstore.database.repositories.BookRepository;
 import com.akselerenberk.bookstore.database.repositories.CartItemRepository;
@@ -35,33 +36,39 @@ public class CartAdapter implements CartPort {
     }
 
     @Override
-    public void addItem(String bookId, Integer quantity) {
+    public Cart addItem(String bookId, Integer quantity) {
         val currentUser = accountService.retrieveCurrentAccount().orElseThrow();
-        val cartEntity = cartRepository.findByAccount(currentUser).orElseThrow();
+        val cartEntity = cartRepository.findByAccount(currentUser).orElse(CartEntity.builder().account(currentUser).build());
         val bookEntity = bookRepository.findById(parseLongOrThrow(bookId)).orElseThrow();
         val cartItemEntity = CartItemEntity.builder().cart(cartEntity).book(bookEntity).quantity(quantity).build();
+        cartEntity.addItem(cartItemEntity);
+        val newCartEntity = cartRepository.save(cartEntity);
         cartItemRepository.save(cartItemEntity);
+        return CartMapper.model(newCartEntity);
     }
 
     @Override
-    public void updateItem(String bookId, Integer quantity) {
+    public Cart updateItem(String bookId, Integer quantity) {
         val currentUser = accountService.retrieveCurrentAccount().orElseThrow();
-        val cartEntity = cartRepository.findByAccount(currentUser).orElseThrow();
-        val bookEntity = bookRepository.findById(parseLongOrThrow(bookId)).orElseThrow();
-        val cartItemEntity = CartItemEntity.builder().cart(cartEntity).book(bookEntity).quantity(quantity).build();
-        cartItemRepository.save(cartItemEntity);
+        val cartEntity = cartRepository.findByAccount(currentUser).orElseThrow(() -> new BadRequestException("Cart not found"));
+        val bookEntity = bookRepository.findById(parseLongOrThrow(bookId)).orElseThrow(() -> new BadRequestException("Book not found"));
+        val cartItemEntity = cartItemRepository.findByBookAndCart(bookEntity, cartEntity).orElseThrow(() -> new BadRequestException("Item not found"));
+        val newCartItemEntity = cartItemEntity.toBuilder().quantity(quantity).build();
+        val newCartEntity = cartRepository.save(cartEntity);
+        cartItemRepository.save(newCartItemEntity);
+        return CartMapper.model(newCartEntity);
     }
 
     @Override
-    public void deleteItem(String bookId) {
+    public Cart deleteItem(String bookId) {
         val currentUser = accountService.retrieveCurrentAccount().orElseThrow();
-        val cartEntity = cartRepository.findByAccount(currentUser).orElseThrow();
+        val cartEntity = cartRepository.findByAccount(currentUser).orElseThrow(() -> new BadRequestException("Cart not found"));
         val bookEntity = bookRepository.findById(parseLongOrThrow(bookId)).orElseThrow();
-        cartItemRepository.findByBookAndCart(bookEntity, cartEntity).ifPresent(cartItemEntity -> {
-            cartEntity.removeItem(cartItemEntity);
-            cartItemRepository.delete(cartItemEntity);
-            cartRepository.save(cartEntity);
-        });
+        val cartItemEntity = cartItemRepository.findByBookAndCart(bookEntity, cartEntity).orElseThrow(() -> new BadRequestException("Item not found"));
+        cartEntity.removeItem(cartItemEntity);
+        cartItemRepository.delete(cartItemEntity);
+        val newCartEntity = cartRepository.save(cartEntity);
+        return CartMapper.model(newCartEntity);
     }
 
     private Long parseLongOrThrow(String bookId) {

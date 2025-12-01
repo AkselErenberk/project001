@@ -13,6 +13,7 @@ public class BookMapper {
                 .id(entity.getId().toString())
                 .title(entity.getTitle())
                 .author(entity.getAuthor())
+                .price(entity.getPrice())
                 .build();
     }
 
@@ -21,6 +22,7 @@ public class BookMapper {
                 .id(Objects.isNull(model.id()) ? null : Long.valueOf(model.id()))
                 .title(model.title())
                 .author(model.author())
+                .price(model.price())
                 .build();
     }
 }

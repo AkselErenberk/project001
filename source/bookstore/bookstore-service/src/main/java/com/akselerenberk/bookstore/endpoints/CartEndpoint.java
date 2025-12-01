@@ -20,8 +20,7 @@ public class CartEndpoint implements CartApi {
 
     @Override
     public ResponseEntity<CartDTO> addCartItem(NewCartItemRequestDTO newCartItemRequestDTO) {
-        cartPort.addItem(newCartItemRequestDTO.getBookId(), newCartItemRequestDTO.getQuantity());
-        val cart = cartPort.retrieveCart();
+        val cart = cartPort.addItem(newCartItemRequestDTO.getBookId(), newCartItemRequestDTO.getQuantity());
         return ResponseEntity.status(HttpStatus.CREATED).body(CartMapper.dto(cart));
     }
 
@@ -39,6 +38,7 @@ public class CartEndpoint implements CartApi {
 
     @Override
     public ResponseEntity<CartDTO> updateCartItem(String bookId, UpdateCartItemRequestDTO updateCartItemRequestDTO) {
-        return retrieveCart();
+        val cart = cartPort.updateItem(bookId, updateCartItemRequestDTO.getQuantity());
+        return ResponseEntity.ok().body(CartMapper.dto(cart));
     }
 }
