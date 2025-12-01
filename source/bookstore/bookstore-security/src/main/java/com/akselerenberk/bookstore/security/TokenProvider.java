@@ -38,10 +38,10 @@ public class TokenProvider {
     }
 
     /**
-     * Extract cartItems from token string.
+     * Extract items from token string.
      *
      * @param token a valid token value
-     * @return String cartItems
+     * @return String items
      */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

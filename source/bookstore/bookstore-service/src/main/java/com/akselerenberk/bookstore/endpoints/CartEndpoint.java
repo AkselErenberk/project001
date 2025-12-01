@@ -18,13 +18,13 @@ public class CartEndpoint implements CartApi {
 
     @Override
     public ResponseEntity<Void> addBookQuantity(AddToCartRequestDTO addToCartRequestDTO) {
-        cartPort.addCartItem(addToCartRequestDTO.getBookId(), addToCartRequestDTO.getQuantity());
+        cartPort.addItem(addToCartRequestDTO.getBookId(), addToCartRequestDTO.getQuantity());
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> removeBook(String bookId) {
-        cartPort.deleteCartItem(bookId);
+        cartPort.deleteItem(bookId);
         return ResponseEntity.noContent().build();
     }
 

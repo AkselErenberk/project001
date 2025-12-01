@@ -7,7 +7,7 @@ import java.util.List;
 
 @Builder(toBuilder = true)
 public record Cart(
-        List<CartItem> cartItems,
+        List<CartItem> items,
         BigDecimal totalPrice
 ) {
 }

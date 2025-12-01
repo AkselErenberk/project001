@@ -31,11 +31,11 @@ public class CartAdapter implements CartPort {
     public Cart retrieveCart() {
         val currentUser = accountService.retrieveCurrentAccount().orElseThrow();
         return cartRepository.findByAccount(currentUser).map(CartMapper::model)
-                .orElse(Cart.builder().cartItems(List.of()).totalPrice(BigDecimal.ZERO).build());
+                .orElse(Cart.builder().items(List.of()).totalPrice(BigDecimal.ZERO).build());
     }
 
     @Override
-    public void addCartItem(String bookId, Integer quantity) {
+    public void addItem(String bookId, Integer quantity) {
         val currentUser = accountService.retrieveCurrentAccount().orElseThrow();
         val cartEntity = cartRepository.findByAccount(currentUser).orElseThrow();
         val bookEntity = bookRepository.findById(parseLongOrThrow(bookId)).orElseThrow();
@@ -44,7 +44,7 @@ public class CartAdapter implements CartPort {
     }
 
     @Override
-    public void updateCartItem(String bookId, Integer quantity) {
+    public void updateItem(String bookId, Integer quantity) {
         val currentUser = accountService.retrieveCurrentAccount().orElseThrow();
         val cartEntity = cartRepository.findByAccount(currentUser).orElseThrow();
         val bookEntity = bookRepository.findById(parseLongOrThrow(bookId)).orElseThrow();
@@ -53,7 +53,7 @@ public class CartAdapter implements CartPort {
     }
 
     @Override
-    public void deleteCartItem(String bookId) {
+    public void deleteItem(String bookId) {
         val currentUser = accountService.retrieveCurrentAccount().orElseThrow();
         val cartEntity = cartRepository.findByAccount(currentUser).orElseThrow();
         val bookEntity = bookRepository.findById(parseLongOrThrow(bookId)).orElseThrow();

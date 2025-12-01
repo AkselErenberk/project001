@@ -57,7 +57,7 @@ public class CartEntity {
             fetch = FetchType.LAZY
     )
     @Builder.Default
-    private List<CartItemEntity> cartItems = new ArrayList<>();
+    private List<CartItemEntity> items = new ArrayList<>();
 
     @Column(name = "LAST_UPDATED_TIME", nullable = false)
     @UpdateTimestamp
@@ -68,10 +68,10 @@ public class CartEntity {
     private LocalDateTime creationTime;
 
     public BigDecimal getTotalPrice() {
-        if (cartItems == null || cartItems.isEmpty()) {
+        if (items == null || items.isEmpty()) {
             return BigDecimal.ZERO;
         }
-        return cartItems.stream()
+        return items.stream()
                 .map(CartItemEntity::getTotalPrice)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -79,13 +79,13 @@ public class CartEntity {
 
     public void addItem(CartItemEntity item) {
         if (item == null) return;
-        cartItems.add(item);
+        items.add(item);
         item.setCart(this);
     }
 
     public void removeItem(CartItemEntity item) {
         if (item == null) return;
-        cartItems.remove(item);
+        items.remove(item);
         item.setCart(null);
     }
 

@@ -9,13 +9,13 @@ public class CartMapper {
     public Cart model(CartEntity entity) {
         return Cart.builder()
                 .totalPrice(entity.getTotalPrice())
-                .cartItems(entity.getCartItems().stream().map(CartItemMapper::model).toList())
+                .items(entity.getItems().stream().map(CartItemMapper::model).toList())
                 .build();
     }
 
     public CartEntity entity(final Cart model) {
         return CartEntity.builder()
-                .cartItems(model.cartItems().stream().map(CartItemMapper::entity).toList())
+                .items(model.items().stream().map(CartItemMapper::entity).toList())
                 .build();
     }
 }
