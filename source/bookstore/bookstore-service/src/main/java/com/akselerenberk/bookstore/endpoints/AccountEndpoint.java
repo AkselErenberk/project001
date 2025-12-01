@@ -5,6 +5,7 @@ import com.akselerenberk.bookstore.core.services.AccountService;
 import com.akselerenberk.bookstore.dto.CredentialsDTO;
 import com.akselerenberk.bookstore.dto.HelloWorldDTO;
 import com.akselerenberk.bookstore.dto.TokenDTO;
+import com.akselerenberk.bookstore.dto.UserDTO;
 import com.akselerenberk.bookstore.mappers.CredentialsMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -19,12 +20,14 @@ public class AccountEndpoint implements AuthApi {
     private final AccountService accountService;
 
     @Override
-    public ResponseEntity<Void> registerUser(final CredentialsDTO credentialsDTO) {
+    public ResponseEntity<UserDTO> registerUser(final CredentialsDTO credentialsDTO) {
         val credentials = CredentialsMapper.mapDtoToModel(credentialsDTO);
 
         accountService.registerNewAccount(credentials);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(UserDTO.builder().username(credentials.username()).build());
     }
 
     @Override

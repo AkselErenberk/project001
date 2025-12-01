@@ -7,7 +7,7 @@ import java.util.List;
 public interface BookPort {
     List<Book> retrieveAllBooks();
 
-    void saveBook(final Book book);
+    Book saveBook(final Book book);
 
     void deleteBook(final String bookId);
 

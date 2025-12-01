@@ -4,9 +4,9 @@ import com.akselerenberk.bookstore.adapters.mappers.BookMapper;
 import com.akselerenberk.bookstore.common.exception.BadRequestException;
 import com.akselerenberk.bookstore.core.models.Book;
 import com.akselerenberk.bookstore.core.ports.BookPort;
-import com.akselerenberk.bookstore.database.entities.BookEntity;
 import com.akselerenberk.bookstore.database.repositories.BookRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +26,12 @@ public class BookAdapter implements BookPort {
     }
 
     @Override
-    public void saveBook(final Book book) {
+    public Book saveBook(final Book book) {
         if (Objects.nonNull(book.id()) && !repository.existsById(parseLongOrThrow(book.id()))) {
             throw new BadRequestException("Book with id " + book.id() + " doesn't exists");
         }
-        repository.save(BookMapper.entity(book));
+        val bookEntity = repository.save(BookMapper.entity(book));
+        return BookMapper.model(bookEntity);
     }
 
     @Override
