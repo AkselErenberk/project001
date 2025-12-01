@@ -7,7 +7,25 @@ version: "3.9"
 # For example, a service, a server, a client, a database...
 # We use the keyword 'services' to start to create services.
 services:
-  # The name of our service is "database"
+
+  bookstore-api:
+    container_name: bookstore-api
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    # Optional: restart policy
+    restart: unless-stopped
+
+
+
+  # The name of our service is "postgres"
   # but you can use the name of your choice.
   # Note: This may change the commands you are going to use a little bit.
   postgres:
@@ -24,8 +42,6 @@ services:
     # you are connecting to your database.
     ports:
       - 5432:5432
-
-
 
     # The `env_file` tag allows us to declare an environment file
     env_file:
