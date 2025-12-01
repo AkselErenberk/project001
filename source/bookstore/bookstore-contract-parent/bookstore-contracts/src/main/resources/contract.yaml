@@ -9,6 +9,7 @@ paths:
   /api/hello-world:
     get:
       summary: Hello world
+      description: Simple endpoint to verify API is running.
       operationId: helloWorld
       tags:
         - auth
@@ -19,10 +20,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HelloWorld"
+              example:
+                helloWorld: "HELLO_WORLD"
 
   /api/auth/register:
     post:
-      summary: Registering the user
+      summary: Register a new user
+      description: Creates a new user account.
       operationId: registerUser
       requestBody:
         required: true
@@ -30,20 +34,29 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Credentials"
+            example:
+              username: "john_doe"
+              password: "secret123"
       tags:
         - auth
       responses:
         201:
-          description: Created
+          description: User registered successfully
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-
+              example:
+                username: "john_doe"
+        400:
+          description: Invalid input
+        409:
+          description: Username already exists
 
   /api/auth/login:
     post:
-      summary: Authenticating the current user
+      summary: Authenticate user
+      description: Returns a JWT token for authenticated requests.
       operationId: authenticateUser
       requestBody:
         required: true
@@ -51,21 +64,29 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Credentials"
+            example:
+              username: "john_doe"
+              password: "secret123"
       tags:
         - auth
       responses:
         200:
-          description: User Authenticated
+          description: Authentication successful
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Token"
+              example:
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        401:
+          description: Invalid credentials
 
   /api/books:
     get:
-      summary: Retrieve all the books
+      summary: Retrieve all books
+      description: Returns a list of all available books.
       security:
-        - bearerAuth: [ ]  # <-- Requires JWT token
+        - bearerAuth: []
       operationId: retrieveAllBooks
       tags:
         - books
@@ -78,27 +99,53 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Book"
+              example:
+                - id: "123"
+                  title: "Clean Code"
+                  author: "Robert C. Martin"
+                  price: 39.99
+                - id: "124"
+                  title: "Effective Java"
+                  author: "Joshua Bloch"
+                  price: 45.50
+        401:
+          description: Unauthorized
     post:
-      summary: Add new book
+      summary: Add a new book
+      description: Creates a new book entry.
       security:
-        - bearerAuth: [ ]  # <-- Requires JWT token
+        - bearerAuth: []
       operationId: addBook
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateBookRequest"
+            example:
+              title: "Domain-Driven Design"
+              author: "Eric Evans"
+              price: 49.99
       tags:
         - books
       responses:
         201:
-          description: Created
+          description: Book created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Book"
-
-
+              example:
+                id: "125"
+                title: "Domain-Driven Design"
+                author: "Eric Evans"
+                price: 49.99
+        400:
+          description: Invalid input
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
 
   /api/books/{id}:
     parameters:
@@ -108,9 +155,10 @@ paths:
         schema:
           type: string
     get:
-      summary: Retrieve a book details by its id
+      summary: Retrieve book details
+      description: Returns details of a specific book by ID.
       security:
-        - bearerAuth: [ ]  # <-- Requires JWT token
+        - bearerAuth: []
       operationId: retrieveBook
       tags:
         - books
@@ -121,25 +169,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Book'
+              example:
+                id: "123"
+                title: "Clean Code"
+                author: "Robert C. Martin"
+                price: 39.99
+        401:
+          description: Unauthorized
         404:
           description: Book not found
-
     delete:
-      summary: Deleting a book by its id
+      summary: Delete a book
+      description: Removes a book by its ID.
       security:
-        - bearerAuth: [ ]  # <-- Requires JWT token
+        - bearerAuth: []
       operationId: deleteBook
       tags:
         - books
       responses:
         204:
           description: No Content
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
         404:
           description: Book not found
     put:
-      summary: Update a book by its id
+      summary: Update a book
+      description: Updates details of a book by ID.
       security:
-        - bearerAuth: [ ]  # <-- Requires JWT token
+        - bearerAuth: []
       operationId: updateBook
       requestBody:
         required: true
@@ -147,37 +207,62 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateBookRequest"
+            example:
+              title: "Clean Code (Updated)"
+              author: "Robert C. Martin"
+              price: 42.99
       tags:
         - books
       responses:
         200:
-          description: Ok
+          description: Book updated
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Book"
+              example:
+                id: "123"
+                title: "Clean Code (Updated)"
+                author: "Robert C. Martin"
+                price: 42.99
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
         404:
           description: Book not found
 
   /api/cart:
     get:
-      summary: View cart of logged-in user
+      summary: View cart
+      description: Retrieves the cart of the logged-in user.
       security:
-        - bearerAuth: [ ]  # <-- Requires JWT token
+        - bearerAuth: []
       operationId: retrieveCart
       tags:
         - cart
       responses:
         200:
-          description: Ok
+          description: Cart details
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Cart"
+              example:
+                items:
+                  - book:
+                      id: "123"
+                      title: "Clean Code"
+                      author: "Robert C. Martin"
+                      price: 39.99
+                    quantity: 2
+                    totalPrice: 79.98
+                totalPrice: 79.98
     post:
-      summary: Add a new item in the cart
+      summary: Add item to cart
+      description: Adds a book to the user's cart.
       security:
-        - bearerAuth: [ ]  # <-- Requires JWT token
+        - bearerAuth: []
       operationId: addCartItem
       requestBody:
         required: true
@@ -185,16 +270,20 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/NewCartItemRequest"
+            example:
+              bookId: "123"
+              quantity: 2
       tags:
         - cart
       responses:
         201:
-          description: Created
+          description: Item added
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Cart"
-
+        401:
+          description: Unauthorized
 
   /api/cart/{bookId}:
     parameters:
@@ -204,35 +293,48 @@ paths:
         schema:
           type: string
     delete:
-      summary: Removing a book from the cart
+      summary: Remove item from cart
+      description: Removes a book from the user's cart.
       security:
-        - bearerAuth: [ ]  # <-- Requires JWT token
+        - bearerAuth: []
       operationId: removeCartItem
       tags:
         - cart
       responses:
         204:
           description: No Content
+        400:
+          description: Invalid input
+        401:
+          description: Unauthorized
+
     put:
-      summary: Update quantity of a book
+      summary: Update item quantity
+      description: Updates the quantity of a book in the cart.
       security:
-        - bearerAuth: [ ]  # <-- Requires JWT token
+        - bearerAuth: []
       operationId: updateCartItem
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateCartItemRequest"
+            example:
+              quantity: 3
       tags:
         - cart
       responses:
         200:
-          description: Ok
+          description: Cart updated
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Cart"
-
+        400:
+          description: Invalid input
+        401:
+          description: Unauthorized
 
 components:
   securitySchemes:
@@ -244,6 +346,7 @@ components:
   schemas:
     Book:
       type: object
+      description: Represents a book in the bookstore.
       required:
         - id
         - title
@@ -261,6 +364,7 @@ components:
 
     UpdateBookRequest:
       type: object
+      description: Payload for creating or updating a book.
       required:
         - title
         - author
@@ -275,6 +379,7 @@ components:
 
     Cart:
       type: object
+      description: Represents a user's shopping cart.
       required:
         - items
       properties:
@@ -287,6 +392,7 @@ components:
 
     CartItem:
       type: object
+      description: Represents an item in the cart.
       required:
         - book
         - quantity
@@ -300,6 +406,7 @@ components:
 
     NewCartItemRequest:
       type: object
+      description: Payload for adding a new item to the cart.
       required:
         - bookId
         - quantity
@@ -312,6 +419,7 @@ components:
 
     UpdateCartItemRequest:
       type: object
+      description: Payload for updating quantity of an item in the cart.
       required:
         - quantity
       properties:
@@ -319,9 +427,9 @@ components:
           type: integer
           minimum: 1
 
-
     Credentials:
       type: object
+      description: User credentials for authentication.
       required:
         - username
         - password
@@ -334,21 +442,24 @@ components:
 
     Token:
       type: object
+      description: JWT token for authenticated requests.
       required:
         - token
       properties:
         token:
           type: string
-          description: "JWT token for authentication"
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
     User:
       type: object
+      description: Represents a registered user.
       properties:
         username:
           type: string
 
     HelloWorld:
       type: object
+      description: Simple hello world response.
       required:
         - helloWorld
       properties:
