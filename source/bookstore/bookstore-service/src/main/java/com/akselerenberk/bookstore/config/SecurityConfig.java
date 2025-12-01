@@ -94,8 +94,8 @@ public class SecurityConfig {
                 // Set permissions on endpoints
                 .authorizeHttpRequests()
                 .requestMatchers("/api/hello-world").permitAll()
-                .requestMatchers("/api/account/authenticate").permitAll()
-                .requestMatchers("/api/account/register").permitAll()
+                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/register").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                         "/configuration/ui",
