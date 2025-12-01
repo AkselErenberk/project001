@@ -14,7 +14,7 @@ paths:
         - auth
       responses:
         200:
-          description: hello world
+          description: Ok
           content:
             application/json:
               schema:
@@ -34,7 +34,12 @@ paths:
         - auth
       responses:
         201:
-          description: User registered
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
 
   /api/auth/login:
     post:
@@ -56,9 +61,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Token"
 
-  /api/books/:
+  /api/books:
     get:
       summary: Retrieve all the books
+      security:
+        - bearerAuth: [ ]  # <-- Requires JWT token
       operationId: retrieveAllBooks
       tags:
         - books
@@ -73,17 +80,24 @@ paths:
                   $ref: "#/components/schemas/Book"
     post:
       summary: Add new book
+      security:
+        - bearerAuth: [ ]  # <-- Requires JWT token
       operationId: addBook
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/BookRequest"
+              $ref: "#/components/schemas/UpdateBookRequest"
       tags:
         - books
       responses:
         201:
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+
 
 
   /api/books/{id}:
@@ -95,13 +109,9 @@ paths:
           type: string
     get:
       summary: Retrieve a book details by its id
+      security:
+        - bearerAuth: [ ]  # <-- Requires JWT token
       operationId: retrieveBook
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Book"
       tags:
         - books
       responses:
@@ -111,60 +121,79 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Book'
-
         404:
           description: Book not found
 
     delete:
       summary: Deleting a book by its id
+      security:
+        - bearerAuth: [ ]  # <-- Requires JWT token
       operationId: deleteBook
       tags:
         - books
       responses:
         204:
-          description: Book deleted
+          description: No Content
+        404:
+          description: Book not found
     put:
       summary: Update a book by its id
+      security:
+        - bearerAuth: [ ]  # <-- Requires JWT token
       operationId: updateBook
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/BookRequest"
+              $ref: "#/components/schemas/UpdateBookRequest"
       tags:
         - books
       responses:
         200:
-          description: Book updated
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        404:
+          description: Book not found
 
-  /api/cart/:
+  /api/cart:
     get:
       summary: View cart of logged-in user
+      security:
+        - bearerAuth: [ ]  # <-- Requires JWT token
       operationId: retrieveCart
       tags:
         - cart
       responses:
         200:
-          description: Cart details
+          description: Ok
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Cart"
     post:
-      summary: Add new book
-      operationId: addBookQuantity
+      summary: Add a new item in the cart
+      security:
+        - bearerAuth: [ ]  # <-- Requires JWT token
+      operationId: addCartItem
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddToCartRequest"
+              $ref: "#/components/schemas/NewCartItemRequest"
       tags:
         - cart
       responses:
         201:
-          description: Book added to cart
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
 
 
   /api/cart/{bookId}:
@@ -176,30 +205,50 @@ paths:
           type: string
     delete:
       summary: Removing a book from the cart
-      operationId: removeBook
+      security:
+        - bearerAuth: [ ]  # <-- Requires JWT token
+      operationId: removeCartItem
       tags:
         - cart
       responses:
         204:
-          description: Book removed
+          description: No Content
     put:
       summary: Update quantity of a book
-      operationId: updateBookQuantity
+      security:
+        - bearerAuth: [ ]  # <-- Requires JWT token
+      operationId: updateCartItem
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateQuantityRequest"
+              $ref: "#/components/schemas/UpdateCartItemRequest"
       tags:
         - cart
       responses:
-        201:
-          description: Created
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     Book:
       type: object
+      required:
+        - id
+        - title
+        - author
+        - price
       properties:
         id:
           type: string
@@ -210,7 +259,7 @@ components:
         price:
           type: number
 
-    BookRequest:
+    UpdateBookRequest:
       type: object
       required:
         - title
@@ -226,6 +275,8 @@ components:
 
     Cart:
       type: object
+      required:
+        - items
       properties:
         items:
           type: array
@@ -236,19 +287,18 @@ components:
 
     CartItem:
       type: object
+      required:
+        - book
+        - quantity
       properties:
-        bookId:
-          type: string
-        title:
-          type: string
-        price:
-          type: number
+        book:
+          $ref: '#/components/schemas/Book'
         quantity:
           type: integer
-        subtotal:
+        totalPrice:
           type: number
 
-    AddToCartRequest:
+    NewCartItemRequest:
       type: object
       required:
         - bookId
@@ -258,14 +308,16 @@ components:
           type: string
         quantity:
           type: integer
+          minimum: 1
 
-    UpdateQuantityRequest:
+    UpdateCartItemRequest:
       type: object
       required:
         - quantity
       properties:
         quantity:
           type: integer
+          minimum: 1
 
 
     Credentials:
@@ -286,6 +338,13 @@ components:
         - token
       properties:
         token:
+          type: string
+          description: "JWT token for authentication"
+
+    User:
+      type: object
+      properties:
+        username:
           type: string
 
     HelloWorld:
