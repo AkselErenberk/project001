@@ -30,7 +30,6 @@ mvn clean package -DskipTests
 
 To run with docker, from the root execute:
 docker build -t bookstore-api .
-docker run --rm -p 8080:8080 bookstore-api
 
 Run with Docker Compose (PostgreSQL + API):
 docker compose up --build
